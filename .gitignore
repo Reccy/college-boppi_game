@@ -1,0 +1,10 @@
+# Security Certs for AWS configuration (Not used as project files)
+security_certs/
+
+# AWS configuration
+config/aws.config
+config/sensors.config
+config/certs
+
+# Python compiled
+*.pyc

@@ -1,0 +1,1 @@
+# Bop Pi - College Project## DescriptionBopPi is an interactive Raspberry Pi game based on classic games such as Simon and BopIt! The player has to follow the game instructions within a time limit by pressing buttons, waving over motion sensors, etc.
