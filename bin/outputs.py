@@ -14,13 +14,22 @@ class Outputs(Thread):
 		self.LIGHT_PIN = 7	# Socket D7
 		self.SOUND_PIN = 2	# Socket D2
 
+		print("Testing Outputs")
+		print("BUTTON_PIN = {}, LIGHT_PIN = {}, SOUND_PIN = {}".format(self.BUTTON_PIN, self.LIGHT_PIN, self.SOUND_PIN))
+
 		# Init currently selected LED
-		self.set_button_led()
+		self.set_all_leds()
 
 		# Configure Thread
 		Thread.__init__(self)
 		self.run_event = run_event
 		self.daemon=True
+
+	def set_all_leds(self):
+		self.selected_led = "ALL"
+		grovepi.digitalWrite(self.BUTTON_PIN, 1)
+		grovepi.digitalWrite(self.LIGHT_PIN, 1)
+		grovepi.digitalWrite(self.SOUND_PIN, 1)
 
 	def set_button_led(self):
 		self.selected_led = "BUTTON"
@@ -40,6 +49,11 @@ class Outputs(Thread):
 		grovepi.digitalWrite(self.LIGHT_PIN, 0)
 		grovepi.digitalWrite(self.SOUND_PIN, 1)
 
+	def unset_leds(self):
+		grovepi.digitalWrite(self.BUTTON_PIN, 0)
+		grovepi.digitalWrite(self.LIGHT_PIN, 0)
+		grovepi.digitalWrite(self.SOUND_PIN, 0)
+
 	def stop(self):
 		"""Stops the outputs thread by clearing the run flag"""
 		self.run_event.clear()
@@ -51,14 +65,17 @@ class Outputs(Thread):
 
 		while self.run_event.is_set():
 			if self.selected_led is "BUTTON":
-				self.set_light_led()
+				self.set_button_led()
 			elif self.selected_led is "LIGHT":
+				self.set_light_led()
+			elif self.selected_led is "SOUND":
 				self.set_sound_led()
 			else:
-				self.set_button_led()
-			time.sleep(0.1)
+				self.set_all_leds()
+				
+			time.sleep(0.05)
+			self.unset_leds()
+			time.sleep(0.05)
 
 		# Turn off all LEDs when thread ends
-		grovepi.digitalWrite(self.BUTTON_PIN, 0)
-		grovepi.digitalWrite(self.LIGHT_PIN, 0)
-		grovepi.digitalWrite(self.SOUND_PIN, 0)
+		self.unset_leds()
