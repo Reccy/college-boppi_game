@@ -11,9 +11,9 @@ class Sensors(Thread):
 		"""Ensures sensors are setup properly and sets up callbacks"""
 
 		# Set the GrovePi pins to read the sensors from
-		self.BUTTON_PIN = 3
-		self.LIGHT_PIN = 0
-		self.SOUND_PIN = 1
+		self.BUTTON_PIN = 3	# Socket D3
+		self.LIGHT_PIN = 0	# Socket A0
+		self.SOUND_PIN = 1	# Socket A1
 
 		print("Testing Sensors")
 		print("BUTTON_PIN = {}, LIGHT_PIN = {}, SOUND_PIN = {}".format(self.BUTTON_PIN, self.LIGHT_PIN, self.SOUND_PIN))
