@@ -14,8 +14,8 @@ class Outputs(Thread):
 		self.LIGHT_PIN = 7	# Socket D7
 		self.SOUND_PIN = 2	# Socket D2
 
-		print("Testing Outputs")
-		print("BUTTON_PIN = {}, LIGHT_PIN = {}, SOUND_PIN = {}".format(self.BUTTON_PIN, self.LIGHT_PIN, self.SOUND_PIN))
+		print("[OUTPUTS] Testing Outputs")
+		print("[OUTPUTS] BUTTON_PIN = {}, LIGHT_PIN = {}, SOUND_PIN = {}".format(self.BUTTON_PIN, self.LIGHT_PIN, self.SOUND_PIN))
 
 		# Init currently selected LED
 		self.set_all_leds()
@@ -56,12 +56,13 @@ class Outputs(Thread):
 
 	def stop(self):
 		"""Stops the outputs thread by clearing the run flag"""
+		print("[OUTPUTS] Stopping thread")
 		self.run_event.clear()
 		
 
 	def run(self):
 		"""Reads the sensors and runs its callback when applicable"""
-		print("Outputs thread running")
+		print("[OUTPUTS] Outputs thread running")
 
 		while self.run_event.is_set():
 			if self.selected_led is "BUTTON":

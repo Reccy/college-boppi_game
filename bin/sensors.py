@@ -15,8 +15,8 @@ class Sensors(Thread):
 		self.LIGHT_PIN = 0	# Socket A0
 		self.SOUND_PIN = 1	# Socket A1
 
-		print("Testing Sensors")
-		print("BUTTON_PIN = {}, LIGHT_PIN = {}, SOUND_PIN = {}".format(self.BUTTON_PIN, self.LIGHT_PIN, self.SOUND_PIN))
+		print("[SENSORS] Testing Sensors")
+		print("[SENSORS] BUTTON_PIN = {}, LIGHT_PIN = {}, SOUND_PIN = {}".format(self.BUTTON_PIN, self.LIGHT_PIN, self.SOUND_PIN))
 
 		# Calibrate the base light and sound readings. Then set the trigger values for when to call the callbacks.
 		self.light_threshold_delta = -75
@@ -27,10 +27,10 @@ class Sensors(Thread):
 		self.light_threshold = self.calibrated_light_reading + self.light_threshold_delta
 		self.sound_threshold = self.calibrated_sound_reading + self.sound_threshold_delta
 
-		print("Calibrated Light Value: {}".format(self.calibrated_light_reading))
-		print("Calibrated Sound Value: {}".format(self.calibrated_sound_reading))
-		print("Light Threshold: {}".format(self.light_threshold))
-		print("Sound Threshold: {}".format(self.sound_threshold))
+		print("[SENSORS] Calibrated Light Value: {}".format(self.calibrated_light_reading))
+		print("[SENSORS] Calibrated Sound Value: {}".format(self.calibrated_sound_reading))
+		print("[SENSORS] Light Threshold: {}".format(self.light_threshold))
+		print("[SENSORS] Sound Threshold: {}".format(self.sound_threshold))
 
 		# Setup the callbacks and default last readings
 		self.last_button_read = 0
@@ -85,11 +85,12 @@ class Sensors(Thread):
 
 	def stop(self):
 		"""Stops the sensors thread by clearing the run flag """
+		print("[SENSORS] Stopping thread")
 		self.run_event.clear()
 
 	def run(self):
 		"""Reads the sensors and runs its callback when applicable"""
-		print("Sensor thread running")
+		print("[SENSORS] Sensor thread running")
 
 		while self.run_event.is_set():
 			# Check Button

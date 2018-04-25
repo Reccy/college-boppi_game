@@ -5,7 +5,7 @@ import threading
 import random
 import sys
 import time
-
+import Queue
 
 class BopPi():
 	"""
@@ -14,7 +14,7 @@ class BopPi():
 
 	def __init__(self):
 		""" Setup game """
-		print("Starting BopPi game")
+		print("[BOPPI] Starting BopPi game")
 		boppi_event = threading.Event()
 		boppi_event.set()
 		
@@ -23,8 +23,12 @@ class BopPi():
 
 		# Init selected sensor
 		self.selected_sensor = BopPi.select_random_sensor()
+
+		# Init network publisher queue
+		self.publisher_queue = Queue.Queue()
 		
 		# Init timings. (Start time for the action, End time for the action, How long an action should take, How much to shorten the reaction time to the action, The minimum amount of time for every action)
+		self.game_started = False
 		self.action_start_time = None
 		self.action_end_time = None
 		self.action_time = 5
@@ -38,35 +42,39 @@ class BopPi():
 		self.sensors = Sensors(boppi_event, self.on_button_pressed, self.on_dark, self.on_loud)
 		self.sensors.start()
 		
-		self.network = Network()
-
-		# Start the game
-		self.select_next_sensor()
+		self.network = Network(self, boppi_event)
+		self.network.start()
 
 		# Wait for KeyboardInterrupt before closing program
 		try:
 			while True:
 
 				# If the game times out, quit
-				if (self.action_end_time - time.time() <= 0):
-					print("")
-					print("Oh no! You ran out of time  :(")
-					print("Here's your score: {}".format(self.score))
-					print("Thanks for playing!")
-					sys.exit(0)
+				if self.game_started is True:
+					if (self.action_end_time - time.time() <= 0):
+						self.publisher_queue.put(self.score)
+						print("\n[BOPPI] Oh no! You ran out of time  :(")
+						print("[BOPPI] Here's your score: {}".format(self.score))
+						print("[BOPPI] Thanks for playing!")
+						sys.exit(0)
 
 				time.sleep(0.01)
 		except KeyboardInterrupt:
-			print("")
-			print("Quitting BopPi game")
-			print("Thanks for Playing! :-)")
+			print("\n[BOPPI] Quitting BopPi game")
+			print("[BOPPI] Thanks for Playing! :-)")
 		finally:
 			# Stop any other threads
 			self.sensors.stop()
 			self.outputs.stop()
+			self.network.stop()
 			self.sensors.join()
 			self.outputs.join()
+			self.network.join()
 			sys.exit(0)
+
+	def start_game(self):
+		self.game_started = True
+		self.select_next_sensor()
 
 	def select_next_sensor(self):
 		"""Select the next sensor in the game"""
@@ -96,7 +104,7 @@ class BopPi():
 		else:
 			self.action_time = self.action_min_time
 
-		print("Selected Sensor => {}. You have {} seconds to react.".format(self.selected_sensor, self.action_time))
+		print("[BOPPI] Selected Sensor => {}. You have {} seconds to react.".format(self.selected_sensor, self.action_time))
 
 	@staticmethod
 	def select_random_sensor(sensor=None):
@@ -108,18 +116,18 @@ class BopPi():
 
 	# Input callbacks
 	def on_button_pressed(self):
-		if self.selected_sensor is "BUTTON":
-			print("Button instruction completed")
+		if self.selected_sensor is "BUTTON" and self.game_started is True:
+			print("[BOPPI] Button instruction completed")
 			self.select_next_sensor()
 
 	def on_dark(self):
-		if self.selected_sensor is "LIGHT":
-			print("Light instruction completed")
+		if self.selected_sensor is "LIGHT" and self.game_started is True:
+			print("[BOPPI] Light instruction completed")
 			self.select_next_sensor()
 
 	def on_loud(self):
-		if self.selected_sensor is "SOUND":
-			print("Sound instruction completed")
+		if self.selected_sensor is "SOUND" and self.game_started is True:
+			print("[BOPPI] Sound instruction completed")
 			self.select_next_sensor()
 
 
