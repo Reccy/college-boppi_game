@@ -83,6 +83,9 @@ class Sensors(Thread):
 			readings.append(grovepi.analogRead(self.SOUND_PIN))
 		return sum(readings) / float(len(readings))
 
+	def stop(self):
+		"""Stops the sensors thread by clearing the run flag """
+		self.run_event.clear()
 
 	def run(self):
 		"""Reads the sensors and runs its callback when applicable"""
@@ -106,3 +109,5 @@ class Sensors(Thread):
 			if self.current_sound_read > self.sound_threshold and self.last_sound_read <= self.sound_threshold:
 				self.loud_noise_callback()
 			self.last_sound_read = self.current_sound_read
+
+			time.sleep(0.01)
