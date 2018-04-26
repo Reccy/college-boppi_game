@@ -21,7 +21,7 @@ class BopPi():
 		boppi_event.set()
 		
 		# Init score
-		self.score = None
+		self.score = -1
 
 		# Init selected sensor
 		self.selected_sensor = BopPi.select_random_sensor()
@@ -33,7 +33,8 @@ class BopPi():
 		self.game_started = False
 		self.action_start_time = None
 		self.action_end_time = None
-		self.action_time = 5
+		self.original_action_time = 5
+		self.action_time = self.original_action_time
 		self.action_time_delta = -0.1
 		self.action_min_time = 1.5
 
@@ -46,7 +47,7 @@ class BopPi():
 
 		self.sensors = Sensors(boppi_event, self.on_button_pressed, self.on_dark, self.on_loud)
 		self.sensors.start()
-		
+
 		while self.sensors.initialized is False:
 			time.sleep(0.01)
 		
@@ -62,19 +63,23 @@ class BopPi():
 					self.outputs.flashing = True
 					self.initialized = True
 
-				# If the game times out, quit
+				# If the game times out, reset
 				if self.game_started is True:
 					if (self.action_end_time - time.time() <= 0):
 						self.publisher_queue.put(self.score)
 						print("\n[BOPPI] Oh no! You ran out of time  :(")
 						print("[BOPPI] Here's your score: {}".format(self.score))
-						print("[BOPPI] Thanks for playing!")
-						sys.exit(0)
+						self.game_started = False
+						self.initialized = False
+						self.outputs.set_sleep_rate(self.original_action_time)
+						self.outputs.set_all_leds()
+						self.score = -1
 
 				time.sleep(0.01)
 		except KeyboardInterrupt:
 			print("\n[BOPPI] Quitting BopPi game")
 			print("[BOPPI] Thanks for Playing! :-)")
+			self.publisher_queue.put("GAME_QUIT")
 		finally:
 			# Stop any other threads
 			self.sensors.stop()
@@ -91,11 +96,8 @@ class BopPi():
 
 	def select_next_sensor(self):
 		"""Select the next sensor in the game"""
-		# Increment score if set, init if not
-		if self.score is None:
-			self.score = 0
-		else:
-			self.score += 1
+		# Increment score
+		self.score += 1
 
 		# Choose random instruction
 		self.selected_sensor = BopPi.select_random_sensor(self.selected_sensor)

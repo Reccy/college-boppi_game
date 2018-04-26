@@ -109,6 +109,7 @@ class Subscriber(Thread):
 
 		if msg == "START_GAME" and self.boppi.game_started is False:
 			self.boppi.start_game()
+			self.boppi.publisher_queue.put("START_GAME")
 
 	def stop(self):
 		print("[SUBSCRIBER] Stopping thread")
@@ -143,9 +144,19 @@ class Publisher(Thread):
 		while self.run_event.is_set() or self.boppi.publisher_queue.empty() is False:
 			if self.boppi.publisher_queue.empty() is False:
 				queued_msg = self.boppi.publisher_queue.get()
-				print("[PUBLISHER] Publishing message: [{}]".format(queued_msg))
-				self.client.publish("BopPi/From", queued_msg, 1)
-			time.sleep(0.02)
+				send_msg = {}
+				
+				if queued_msg is "START_GAME":
+					send_msg['type'] = "start_game"
+				elif queued_msg is "GAME_QUIT":
+					send_msg['type'] = "game_quit"
+				else:
+					send_msg['type'] = "score"
+
+				send_msg['message'] = queued_msg
+				print("[PUBLISHER] Publishing message: [{}]".format(json.dumps(send_msg)))
+				self.client.publish("BopPi/From", json.dumps(send_msg), 0)
+			time.sleep(0.1)
 
 	def stop(self):
 		print("[PUBLISHER] Stopping thread")
