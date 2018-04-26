@@ -109,7 +109,6 @@ class Subscriber(Thread):
 
 		if msg == "START_GAME" and self.boppi.game_started is False:
 			self.boppi.start_game()
-			self.boppi.publisher_queue.put("START_GAME")
 
 	def stop(self):
 		print("[SUBSCRIBER] Stopping thread")
@@ -146,10 +145,20 @@ class Publisher(Thread):
 				queued_msg = self.boppi.publisher_queue.get()
 				send_msg = {}
 				
-				if queued_msg is "START_GAME":
-					send_msg['type'] = "start_game"
-				elif queued_msg is "GAME_QUIT":
+				if queued_msg is "GAME_QUIT":
 					send_msg['type'] = "game_quit"
+				elif queued_msg is "BUTTON":
+					send_msg['type'] = "button"
+				elif queued_msg is "SOUND":
+					send_msg['type'] = "sound"
+				elif queued_msg is "LIGHT":
+					send_msg['type'] = "light"
+				elif queued_msg is "SHAKE":
+					send_msg['type'] = "shake"
+				elif queued_msg is "POINT":
+					send_msg['type'] = "point"
+				elif queued_msg is "TAP":
+					send_msg['type'] = "tap"
 				else:
 					send_msg['type'] = "score"
 

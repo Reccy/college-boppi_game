@@ -56,6 +56,12 @@ class Outputs(Thread):
 		grovepi.digitalWrite(self.LIGHT_PIN, 0)
 		grovepi.digitalWrite(self.SOUND_PIN, 1)
 
+	def set_network_led(self):
+		self.selected_led = "NETWORK"
+		grovepi.digitalWrite(self.BUTTON_PIN, 0)
+		grovepi.digitalWrite(self.LIGHT_PIN, 0)
+		grovepi.digitalWrite(self.SOUND_PIN, 0)
+
 	def unset_leds(self):
 		grovepi.digitalWrite(self.BUTTON_PIN, 0)
 		grovepi.digitalWrite(self.LIGHT_PIN, 0)
@@ -91,6 +97,8 @@ class Outputs(Thread):
 				self.set_light_led()
 			elif self.selected_led is "SOUND":
 				self.set_sound_led()
+			elif self.selected_led is "NETWORK":
+				self.unset_leds()
 			else:
 				self.set_all_leds()
 

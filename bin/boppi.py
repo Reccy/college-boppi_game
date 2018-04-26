@@ -70,6 +70,11 @@ class BopPi():
 						print("\n[BOPPI] Oh no! You ran out of time  :(")
 						print("[BOPPI] Here's your score: {}".format(self.score))
 						self.game_started = False
+						self.action_start_time = None
+						self.action_end_time = None
+						self.action_time = self.original_action_time
+						self.action_time_delta = -0.1
+						self.action_min_time = 1.5
 						self.initialized = False
 						self.outputs.set_sleep_rate(self.original_action_time)
 						self.outputs.set_all_leds()
@@ -107,8 +112,15 @@ class BopPi():
 			self.outputs.set_button_led()
 		elif self.selected_sensor is "SOUND":
 			self.outputs.set_sound_led()
-		else:
+		elif self.selected_sensor is "LIGHT":
 			self.outputs.set_light_led()
+		elif self.selected_sensor is "SHAKE" or self.selected_sensor is "POINT" or self.selected_sensor is "TAP":
+			self.outputs.set_network_led()
+		else:
+			print("Unhandled Sensor: {}".format(self.selected_sensor))
+
+		# Send network request
+		self.publisher_queue.put(self.selected_sensor)
 
 		# Set the start and end times for this action, and update the delta, making it shorter
 		self.action_start_time = time.time()
@@ -126,7 +138,7 @@ class BopPi():
 	@staticmethod
 	def select_random_sensor(sensor=None):
 		"""Selects a random sensor"""
-		returned_sensor = random.choice(["BUTTON", "SOUND", "LIGHT"])
+		returned_sensor = random.choice(["BUTTON", "SOUND", "LIGHT", "SHAKE", "TAP", "POINT"])
 		if sensor is returned_sensor:
 			returned_sensor = BopPi.select_random_sensor(sensor)
 		return returned_sensor
@@ -145,6 +157,11 @@ class BopPi():
 	def on_loud(self):
 		if self.selected_sensor is "SOUND" and self.game_started is True:
 			print("[BOPPI] Sound instruction completed")
+			self.select_next_sensor()
+
+	def on_shake(self):
+		if self.selected_sensor is "SHAKE" and self.game_started is True:
+			print("[BOPPI] Shake instruction completed")
 			self.select_next_sensor()
 
 
