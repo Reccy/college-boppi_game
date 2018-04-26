@@ -68,6 +68,8 @@ class Sensors(Thread):
 		# Sample the light sensor
 		for i in range(0, reading_amount):
 			readings.append(grovepi.analogRead(self.LIGHT_PIN))
+			if do_calibration:
+				time.sleep(0.001)
 		return sum(readings) / float(len(readings))
 
 
@@ -78,11 +80,13 @@ class Sensors(Thread):
 
 		# Perform longer sample if it's a calibration
 		if do_calibration:
-			reading_amount = 500
+			reading_amount = 1500
 
 		# Sample the sound sensor readings
 		for i in range(0, reading_amount):
 			readings.append(grovepi.analogRead(self.SOUND_PIN))
+			if do_calibration:
+				time.sleep(0.001)
 		return sum(readings) / float(len(readings))
 
 	def stop(self):

@@ -13,8 +13,8 @@ class Outputs(Thread):
 
 		# Set the GrovePi pins to send data to
 		self.BUTTON_PIN = 4	# Socket D4
-		self.LIGHT_PIN = 7	# Socket D7
-		self.SOUND_PIN = 2	# Socket D2
+		self.LIGHT_PIN = 2	# Socket D2
+		self.SOUND_PIN = 7	# Socket D7
 
 		print("[OUTPUTS] Testing Outputs")
 		print("[OUTPUTS] BUTTON_PIN = {}, LIGHT_PIN = {}, SOUND_PIN = {}".format(self.BUTTON_PIN, self.LIGHT_PIN, self.SOUND_PIN))
@@ -75,6 +75,9 @@ class Outputs(Thread):
 	def set_sleep_rate(self, rate):
 		"""How many seconds"""
 		self.sleep_rate = (rate / self.base_sleep_rate) * 0.5
+
+	def speed_up(self, rate):
+		self.sleep_rate = self.sleep_rate * rate
 		
 
 	def run(self):

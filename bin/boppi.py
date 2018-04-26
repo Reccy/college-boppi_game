@@ -84,9 +84,12 @@ class BopPi():
 		except KeyboardInterrupt:
 			print("\n[BOPPI] Quitting BopPi game")
 			print("[BOPPI] Thanks for Playing! :-)")
-			self.publisher_queue.put("GAME_QUIT")
+		except Exception as e:
+			print("An Exception Occured! Oh no :(")
+			print(e)
 		finally:
 			# Stop any other threads
+			self.publisher_queue.put("GAME_QUIT")
 			self.sensors.stop()
 			self.outputs.stop()
 			self.network.stop()
@@ -131,14 +134,14 @@ class BopPi():
 		else:
 			self.action_time = self.action_min_time
 
-		self.outputs.set_sleep_rate(self.action_time)
+		self.outputs.speed_up(0.96)
 
 		print("[BOPPI] Selected Sensor => {}. You have {} seconds to react.".format(self.selected_sensor, self.action_time))
 
 	@staticmethod
 	def select_random_sensor(sensor=None):
 		"""Selects a random sensor"""
-		returned_sensor = random.choice(["BUTTON", "SOUND", "LIGHT", "SHAKE", "TAP", "POINT"])
+		returned_sensor = random.choice(["BUTTON", "SOUND", "LIGHT", "SHAKE", "POINT", "TAP"])
 		if sensor is returned_sensor:
 			returned_sensor = BopPi.select_random_sensor(sensor)
 		return returned_sensor
