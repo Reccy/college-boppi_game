@@ -13,6 +13,8 @@ class BopPi():
 	"""
 
 	def __init__(self):
+		self.initialized = False
+
 		""" Setup game """
 		print("[BOPPI] Starting BopPi game")
 		boppi_event = threading.Event()
@@ -36,11 +38,17 @@ class BopPi():
 		self.action_min_time = 1.5
 
 		# Setup interface with sensors, network (app) and outputs (LEDs)
-		self.outputs = Outputs(boppi_event)
+		self.outputs = Outputs(boppi_event, self.action_time)
 		self.outputs.start()
+
+		while self.outputs.initialized is False:
+			time.sleep(0.01)
 
 		self.sensors = Sensors(boppi_event, self.on_button_pressed, self.on_dark, self.on_loud)
 		self.sensors.start()
+		
+		while self.sensors.initialized is False:
+			time.sleep(0.01)
 		
 		self.network = Network(self, boppi_event)
 		self.network.start()
@@ -48,6 +56,11 @@ class BopPi():
 		# Wait for KeyboardInterrupt before closing program
 		try:
 			while True:
+
+				if self.network.connected is True and self.initialized is False:
+					print("[BOPPI] Game Initialized")
+					self.outputs.flashing = True
+					self.initialized = True
 
 				# If the game times out, quit
 				if self.game_started is True:
@@ -103,6 +116,8 @@ class BopPi():
 			self.action_time += self.action_time_delta
 		else:
 			self.action_time = self.action_min_time
+
+		self.outputs.set_sleep_rate(self.action_time)
 
 		print("[BOPPI] Selected Sensor => {}. You have {} seconds to react.".format(self.selected_sensor, self.action_time))
 

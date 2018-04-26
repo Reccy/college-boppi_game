@@ -6,8 +6,10 @@ from threading import Thread
 class Outputs(Thread):
 	"""Responsible for controlling outputs"""
 
-	def __init__(self, run_event):
+	def __init__(self, run_event, rate):
 		"""Ensures outputs are setup properly"""
+
+		self.initialized = False
 
 		# Set the GrovePi pins to send data to
 		self.BUTTON_PIN = 4	# Socket D4
@@ -16,6 +18,11 @@ class Outputs(Thread):
 
 		print("[OUTPUTS] Testing Outputs")
 		print("[OUTPUTS] BUTTON_PIN = {}, LIGHT_PIN = {}, SOUND_PIN = {}".format(self.BUTTON_PIN, self.LIGHT_PIN, self.SOUND_PIN))
+
+		# Set sleep rate
+		self.flashing = False
+		self.base_sleep_rate = rate
+		self.set_sleep_rate(rate)
 
 		# Init currently selected LED
 		self.set_all_leds()
@@ -58,13 +65,26 @@ class Outputs(Thread):
 		"""Stops the outputs thread by clearing the run flag"""
 		print("[OUTPUTS] Stopping thread")
 		self.run_event.clear()
+
+	def set_sleep_rate(self, rate):
+		"""How many seconds"""
+		self.sleep_rate = (rate / self.base_sleep_rate) * 0.5
 		
 
 	def run(self):
 		"""Reads the sensors and runs its callback when applicable"""
 		print("[OUTPUTS] Outputs thread running")
+		self.initialized = True
 
 		while self.run_event.is_set():
+
+			if self.flashing is True:
+				time.sleep(self.sleep_rate)
+				self.unset_leds()
+				time.sleep(self.sleep_rate)
+			else:
+				time.sleep(0.05)
+
 			if self.selected_led is "BUTTON":
 				self.set_button_led()
 			elif self.selected_led is "LIGHT":
@@ -73,10 +93,6 @@ class Outputs(Thread):
 				self.set_sound_led()
 			else:
 				self.set_all_leds()
-				
-			time.sleep(0.05)
-			self.unset_leds()
-			time.sleep(0.05)
 
 		# Turn off all LEDs when thread ends
 		self.unset_leds()

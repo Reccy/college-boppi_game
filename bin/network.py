@@ -19,6 +19,7 @@ class Network(Thread):
 		self.run_event = run_event
 
 		# Setup AWS
+		self.connected = False
 		self.client_id = "BopPi"
 		self.endpoint = "a2qfywdy8ysvgg.iot.eu-west-1.amazonaws.com"
 		self.root_ca_path = os.path.abspath(os.path.join(os.path.realpath(__file__), "../../config/security_certs/root_ca.txt"))
@@ -59,6 +60,11 @@ class Network(Thread):
 		self.pub = Publisher(self.boppi, self.run_event, self.client)
 		self.pub.start()
 
+		while self.pub.connected is False and self.sub.connected is False:
+			time.sleep(0.1)
+
+		self.connected = True
+
 	def stop(self):
 		print("[NETWORK] Stopping thread")
 		self.run_event.clear()
@@ -75,6 +81,8 @@ class Subscriber(Thread):
 	"""Responsible for listening to AWS MQTT messages and taking appropriate actions based on those messages"""
 
 	def __init__(self, boppi, run_event, client):
+
+		self.connected = False
 
 		# Set BopPi instance
 		self.boppi = boppi
@@ -93,6 +101,7 @@ class Subscriber(Thread):
 	def run(self):
 		print("[SUBSCRIBER] Subscriber Thread Started")
 		self.client.subscribe("BopPi/To", 1, self.handle_message)
+		self.connected = True
 
 	def handle_message(self, client, userdata, message):
 		msg = json.loads(message.payload)["message"]
@@ -111,6 +120,8 @@ class Publisher(Thread):
 
 	def __init__(self, boppi, run_event, client):
 
+		self.connected = False
+
 		# Set BopPi instance
 		self.boppi = boppi
 
@@ -127,6 +138,8 @@ class Publisher(Thread):
 
 	def run(self):
 		print("[PUBLISHER] Publisher Thread Started")
+		self.connected = True
+
 		while self.run_event.is_set() or self.boppi.publisher_queue.empty() is False:
 			if self.boppi.publisher_queue.empty() is False:
 				queued_msg = self.boppi.publisher_queue.get()

@@ -10,6 +10,8 @@ class Sensors(Thread):
 	def __init__(self, run_event, button_pressed_callback, is_dark_callback, loud_noise_callback):
 		"""Ensures sensors are setup properly and sets up callbacks"""
 
+		self.initialized = False
+
 		# Set the GrovePi pins to read the sensors from
 		self.BUTTON_PIN = 3	# Socket D3
 		self.LIGHT_PIN = 0	# Socket A0
@@ -61,7 +63,7 @@ class Sensors(Thread):
 
 		# Perform longer sample if it's a calibration
 		if do_calibration:
-			reading_amount = 500
+			reading_amount = 1500
 
 		# Sample the light sensor
 		for i in range(0, reading_amount):
@@ -91,6 +93,7 @@ class Sensors(Thread):
 	def run(self):
 		"""Reads the sensors and runs its callback when applicable"""
 		print("[SENSORS] Sensor thread running")
+		self.initialized = True
 
 		while self.run_event.is_set():
 			# Check Button
